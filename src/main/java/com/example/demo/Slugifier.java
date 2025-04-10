@@ -1,6 +1,11 @@
 package com.example.demo;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Slugifier {
+
+    private static final Logger logger = LogManager.getLogger(Slugifier.class);
 
     public static String slugify(String input) {
         if (input == null) return "";
@@ -24,6 +29,8 @@ public class Slugifier {
         normalized = normalized.replaceAll("[Ññ]", "nn");
         normalized = normalized.replaceAll("[Žž]", "zz");
 
+        logger.info("Normalized value after replaceAll: {}", normalized);
+
         StringBuilder result = new StringBuilder();
         for (char c : normalized.toCharArray()) {
             if (Character.isLetterOrDigit(c) || c == '-') {
@@ -32,6 +39,8 @@ public class Slugifier {
                 result.append('-');
             }
         }
+
+        logger.info("Result after appending '-': {}", result);
 
         return result.toString()
                 .replaceAll("-{2,}", "-")
