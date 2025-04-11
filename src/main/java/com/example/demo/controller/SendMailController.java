@@ -27,18 +27,20 @@ public class SendMailController {
 
     @PostConstruct
     public void init() {
-        // Carica il file jdk dal classpath
+        // Carica il file jks dal classpath
         try {
             // todo: aggiungere file jks a resources e indicare il path e la password anche in application.properties
             ClassPathResource resource = new ClassPathResource("your-keystore.jks");
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
             keystore.load(resource.getInputStream(), "your_jks_password".toCharArray());
+            logger.info("JKS inizializzato correttamente");
 
-            // Configura il SSL context con il jdk caricato
+            // Configura il SSL context con il jks caricato
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, null, null);
         } catch (Exception e) {
-            throw new RuntimeException("Errore: JDK non inizializzato correttamente", e);
+            logger.info("Errore inizializzazione JKS: " + e.getMessage());
+            throw new RuntimeException("Errore: JKS non inizializzato correttamente", e);
         }
     }
 
