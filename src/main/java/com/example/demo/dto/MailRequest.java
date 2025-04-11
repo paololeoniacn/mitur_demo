@@ -17,7 +17,8 @@ public class MailRequest {
     private List<@Email String> to;
     private List<@Email String> cc;
     private List<@Email String> bcc;
-    private List<@Email String> replyTo;
+    @Email
+    private String replyTo;
     private String subject;
     private Date sentDate;
     private String bodyText;
