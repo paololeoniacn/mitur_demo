@@ -21,7 +21,7 @@ import java.security.KeyStore;
 @RequestMapping("/api")
 public class SendMailController {
 
-    private SendMailService sendMailService;
+    private final SendMailService sendMailService;
 
     private static final Logger logger = LogManager.getLogger(SendMailController.class);
 
