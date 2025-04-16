@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://www.example.org/putAccommodation" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/putAccommodation" xmlns:Q1="http://www.example.org/putRestaurant" xmlns:Q2="http://www.example.org/putRequest">
+<schema targetNamespace="http://www.example.org/putAccommodation" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/putAccommodation" xmlns:Q2="http://www.example.org/putRequest">
 
-    <import namespace="http://www.example.org/putRequest" schemaLocation="../common/putRequest.xsd"></import>
+    <import namespace="http://www.example.org/putRequest" schemaLocation="putRequest.xsd"></import>
     <element name="requestPutAccommodation"
     	type="tns:requestPutAccommodationType">
     </element>

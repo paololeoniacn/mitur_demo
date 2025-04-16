@@ -75,28 +75,5 @@ public class S3Service {
         return finalPath;
     }
 
-    public String pathBuilderJson(Boolean isUpdate, String name, String city, String region, String initialPathAccommodation){
-        String finalName = name.length() > 80 ? name.substring(0, 80) : name;
-        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
-        if(isUpdate){
-            String finalPath = initialPathAccommodation
-                    + region.toLowerCase() + "/"
-                    + city.toLowerCase() + "/"
-                    + name.toLowerCase() + "/"
-                    + "destination_update_" + finalName
-                    + "_accommodation_"
-                    + timeStamp;
-            return finalPath;
-        } else {
-            String finalPath = initialPathAccommodation
-                    + region.toLowerCase() + "/"
-                    + city.toLowerCase() + "/"
-                    + name.toLowerCase() + "/"
-                    + "destination_put_" + finalName
-                    + "_accommodation_"
-                    + timeStamp;
-            return finalPath;
-        }
-    }
 }
 

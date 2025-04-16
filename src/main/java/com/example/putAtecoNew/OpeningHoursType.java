@@ -1,25 +1,33 @@
-package com.example.putAccommodation;
+package com.example.putAtecoNew;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
-public class LegalEntityType {
+public class OpeningHoursType {
     @XmlElement(namespace = "http://www.example.org/putRequest")
-    private String country;
+    private List<HoursType> mon;
+
     @XmlElement(namespace = "http://www.example.org/putRequest")
-    private String province;
+    private List<HoursType> tue;
+
     @XmlElement(namespace = "http://www.example.org/putRequest")
-    private String city;
+    private List<HoursType> wed;
+
     @XmlElement(namespace = "http://www.example.org/putRequest")
-    private String zipCode;
+    private List<HoursType> thu;
+
     @XmlElement(namespace = "http://www.example.org/putRequest")
-    private String address;
+    private List<HoursType> fri;
+
     @XmlElement(namespace = "http://www.example.org/putRequest")
-    private String civicNumber;
+    private List<HoursType> sat;
+
     @XmlElement(namespace = "http://www.example.org/putRequest")
-    private String emailPEC;
+    private List<HoursType> sun;
 }
