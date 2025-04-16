@@ -1,7 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.MailRequest;
-import com.example.demo.dto.PECMailRequest;
+import com.example.sendMail.MailRequest;
+import com.example.sendMail.PECMailRequest;
+import com.example.sendMail.SendMailService;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

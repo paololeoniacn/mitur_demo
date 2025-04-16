@@ -1,7 +1,5 @@
-package com.example.demo.controller;
+package com.example.putAccommodation;
 
-import com.example.demo.dto.PutAccommodationRequest;
-import com.example.demo.service.PutAccommodationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -31,10 +29,9 @@ public class PutAccommodationController {
             putAccommodationService.putAccommodation(putAccommodationRequest); //richiamo metodo putAccommodation del Service
             logger.info("Richiesta di aggiornamento avvenuta con successo");
 
-            putAccommodationService.renderJsonToCRM(putAccommodationRequest, trackingId, true); // richiamo il metodo per creazione messaggio a CRM
-
-            // TODO: invio messaggio al CRM con SQS
-            logger.info("Invio messaggio con trackingId: {}", trackingId);
+            // TODO: capire se inviare coda o salvare su DB
+            // putAccommodationService.renderJsonToCRM(putAccommodationRequest, trackingId, true); // richiamo il metodo per creazione messaggio a CRM
+            // logger.info("Invio messaggio con trackingId: {}", trackingId);
 
             return ResponseEntity.ok("Aggiornamento avvenuto con successo");
         }catch(ResourceAccessException ex){
@@ -49,13 +46,12 @@ public class PutAccommodationController {
         String trackingId = String.valueOf(UUID.randomUUID());
         try{
             putAccommodationService.validateWithXsd(putAccommodationRequest); // validazione dell'input
-            putAccommodationService.postAccommodation(putAccommodationRequest); //richiamo metodo putAccommodation del Service
+            putAccommodationService.postAccommodation(putAccommodationRequest); //richiamo metodo postAccommodation del Service
             logger.info("Richiesta di inserimento avvenuta con successo");
 
-            putAccommodationService.renderJsonToCRM(putAccommodationRequest, trackingId, false); // richiamo il metodo per creazione messaggio a CRM
-
-            // TODO: invio messaggio al CRM con SQS
-            logger.info("Invio messaggio con trackingId: {}", trackingId);
+            // TODO: capire se inviare coda o salvare su DB
+            //putAccommodationService.renderJsonToCRM(putAccommodationRequest, trackingId, false); // richiamo il metodo per creazione messaggio a CRM
+            // logger.info("Invio messaggio con trackingId: {}", trackingId);
 
             return ResponseEntity.ok("Inserimento avvenuto con successo");
         }catch(ResourceAccessException ex){

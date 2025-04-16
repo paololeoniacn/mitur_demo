@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.sendMail;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

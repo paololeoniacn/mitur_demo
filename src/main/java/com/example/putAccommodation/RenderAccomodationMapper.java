@@ -1,7 +1,5 @@
-package com.example.demo.mapper;
+package com.example.putAccommodation;
 
-import com.example.demo.dto.PutAccommodationRequest;
-import com.example.demo.dto.RenderAccommodationAEM;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

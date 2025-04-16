@@ -1,10 +1,7 @@
-package com.example.demo.service;
+package com.example.putAccommodation;
 
 import com.example.demo.Slugifier;
-import com.example.demo.dto.InputMessageToCRM;
-import com.example.demo.dto.PutAccommodationRequest;
-import com.example.demo.dto.RenderAccommodationAEM;
-import com.example.demo.mapper.RenderAccomodationMapper;
+import com.example.uploadImage.S3Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ValidationException;
@@ -61,7 +58,7 @@ public class PutAccommodationService {
             }
         }
         RenderAccommodationAEM renderAccommodationAEM = renderJson(putAccommodationRequest); // richiamo il metodo per la creazione del JSON da salvare su s3
-        String finalPathJson = s3Service.pathBuilderJson(true, normalizedName, normalizedCity, normalizedRegion, "initialPathAccomodation" );  // metodo per settare il path (SetPathS3)
+        String finalPathJson = s3Service.pathBuilderJson(true, normalizedName, normalizedCity, normalizedRegion, "/content/dam/tdh-infocamere/it/accommodations/" );  // metodo per settare il path (SetPathS3)
 
         // TODO: richiamare metodo per caricare su S3 il JSON
     }
@@ -73,7 +70,7 @@ public class PutAccommodationService {
 
         List<String> imagesURL = putAccommodationRequest.getPhotos();   // Ciclo la lista di immagini e carico su S3 ogni immagine dopo aver creato il path
         for(String imageURL : imagesURL){
-            String finalPath = s3Service.pathBuilder(imageURL,normalizedName, normalizedRegion, normalizedCity, "initialPath");
+            String finalPath = s3Service.pathBuilder(imageURL,normalizedName, normalizedRegion, normalizedCity, "/content/dam/tdh-infocamere/it/accommodations/");
             try{
                 s3Service.uploadImageFromUrl(imageURL, "bucketName", finalPath);
             } catch(IOException ex){
@@ -82,7 +79,7 @@ public class PutAccommodationService {
         }
 
         RenderAccommodationAEM renderAccommodationAEM = renderJson(putAccommodationRequest); // richiamo il metodo per la creazione del JSON da salvare su s3
-        String finalPathJson = s3Service.pathBuilderJson(false, normalizedName, normalizedCity, normalizedRegion, "initialPathAccomodation" );  // metodo per settare il path (SetPathS3)
+        String finalPathJson = s3Service.pathBuilderJson(false, normalizedName, normalizedCity, normalizedRegion, "/content/dam/tdh-infocamere/it/accommodations/");  // metodo per settare il path (SetPathS3)
 
         // TODO: richiamare metodo per caricare su S3 il JSON
     }
@@ -111,6 +108,7 @@ public class PutAccommodationService {
         return mapper.renderJson(putAccommodationRequest);
     }
 
+    // metodo per creare Json da mandare a CRM con la coda
     public InputMessageToCRM renderJsonToCRM(PutAccommodationRequest putAccommodationRequest, String trackingId, Boolean isUpdate){
         String currentTimeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
         try {

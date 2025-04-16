@@ -1,6 +1,5 @@
-package com.example.demo.service;
+package com.example.uploadImage;
 
-import com.example.demo.dto.RenderAccommodationAEM;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;

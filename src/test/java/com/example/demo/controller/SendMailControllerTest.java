@@ -1,8 +1,9 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.MailRequest;
-import com.example.demo.dto.PECMailRequest;
-import com.example.demo.service.SendMailService;
+import com.example.sendMail.MailRequest;
+import com.example.sendMail.PECMailRequest;
+import com.example.sendMail.SendMailService;
+import com.example.sendMail.SendMailController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

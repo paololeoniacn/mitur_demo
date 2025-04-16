@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.putAccommodation;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

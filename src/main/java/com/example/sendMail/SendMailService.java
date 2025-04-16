@@ -1,7 +1,5 @@
-package com.example.demo.service;
+package com.example.sendMail;
 
-import com.example.demo.dto.MailRequest;
-import com.example.demo.dto.PECMailRequest;
 import jakarta.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

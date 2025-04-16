@@ -1,8 +1,5 @@
-package com.example.demo.dto;
+package com.example.putAccommodation;
 
-import com.example.demo.entity.ConsentsType;
-import com.example.demo.entity.ContactType;
-import com.example.demo.entity.LegalEntityType;
 import jakarta.xml.bind.annotation.*;
 import lombok.Data;
 

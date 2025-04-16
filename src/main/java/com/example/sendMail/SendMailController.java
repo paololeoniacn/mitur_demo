@@ -1,21 +1,12 @@
-package com.example.demo.controller;
+package com.example.sendMail;
 
-import com.example.demo.dto.MailRequest;
-import com.example.demo.dto.PECMailRequest;
-import com.example.demo.service.SendMailService;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.net.ssl.SSLContext;
-import java.security.KeyStore;
 
 @RestController
 @RequestMapping("/api")
