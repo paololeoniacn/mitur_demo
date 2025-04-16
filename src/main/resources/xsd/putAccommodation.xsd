@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.example.org/putAccommodation" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/putAccommodation" xmlns:Q1="http://www.example.org/putRestaurant" xmlns:Q2="http://www.example.org/putRequest">
+
+    <import namespace="http://www.example.org/putRequest" schemaLocation="../common/putRequest.xsd"></import>
+    <element name="requestPutAccommodation"
+    	type="tns:requestPutAccommodationType">
+    </element>
+    
+    <complexType name="requestPutAccommodationType">
+    	<sequence>
+    		<element name="identifier" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="name" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="vatCod" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="fiscalCod" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="businessName" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="mainActivity" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="provinceCCIAA" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="reaCCIAACod" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="legalForm" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="consents" type="Q2:consentsType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="companyContact" type="Q2:contactType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="editorContact" type="Q2:contactType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="legalEntity" type="Q2:legalEntityType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="fullAddress" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="city" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="postalCode" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="region" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="province" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="primaryAtecoCod" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="country" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="streetName" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="streetNumber" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="phoneNumber" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="webSite" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="mailAddress" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="googleWebAddress" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="isoCertification" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="photos" type="string" maxOccurs="unbounded"
+    			minOccurs="1">
+    		</element>
+    		<element name="accomodationType" maxOccurs="1"
+    			minOccurs="1">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Hotel"></enumeration>
+    					<enumeration value="Ostello"></enumeration>
+    					<enumeration value="Appartamento"></enumeration>
+    					<enumeration value="Aparthotel"></enumeration>
+    					<enumeration value="Affittacamere"></enumeration>
+    					<enumeration value="Cottage"></enumeration>
+    					<enumeration value="Villa"></enumeration>
+    					<enumeration value="Bungalow"></enumeration>
+    					<enumeration value="Campeggio"></enumeration>
+    					<enumeration value="Glampings"></enumeration>
+    					<enumeration value="Pensione"></enumeration>
+    					<enumeration value="Bed &amp; Breakfast"></enumeration>
+    					<enumeration
+    						value="Alloggio agrituristico/Agriturismo">
+    					</enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="rating" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="description" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="roomService" maxOccurs="unbounded"
+    			minOccurs="0">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Cucina/angolo cottura"></enumeration>
+    					<enumeration value="Bagno privato"></enumeration>
+    					<enumeration value="Aria condizionata"></enumeration>
+    					<enumeration value="Riscaldamento"></enumeration>
+    					<enumeration value="Culla"></enumeration>
+    					<enumeration value="Scrivania"></enumeration>
+    					<enumeration value="Vasca"></enumeration>
+    					<enumeration value="Terrazza/Balcone"></enumeration>
+    					<enumeration value="TV a schermo piatto"></enumeration>
+    					<enumeration value="Lavatrice"></enumeration>
+    					<enumeration value="Asciugacapelli"></enumeration>
+    					<enumeration value="Vista"></enumeration>
+    					<enumeration
+    						value="Bollitore elettrico/Macchina da caffè">
+    					</enumeration>
+    					<enumeration
+    						value="Camera per ospiti disabili">
+    					</enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="paymentMethods" maxOccurs="unbounded"
+    			minOccurs="0">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Carta di credito"></enumeration>
+    					<enumeration value="Bonifico"></enumeration>
+    					<enumeration value="Pagamento in struttura"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="listOfService" maxOccurs="unbounded"
+    			minOccurs="1">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration
+    						value="Connessione WiFi gratuita">
+    					</enumeration>
+    					<enumeration value="Navetta aeroportuale"></enumeration>
+    					<enumeration value="Reception 24 ore su 24"></enumeration>
+    					<enumeration value="Ristorante"></enumeration>
+    					<enumeration value="Sala Fitness"></enumeration>
+    					<enumeration
+    						value="Spa &amp; centro benessere">
+    					</enumeration>
+    					<enumeration value="Piscina"></enumeration>
+    					<enumeration value="Sala Conferenze"></enumeration>
+    					<enumeration value="Deposito Bagagli"></enumeration>
+    					<enumeration value="Parcheggio"></enumeration>
+    					<enumeration value="Camere per famiglie"></enumeration>
+    					<enumeration value="Ascensore"></enumeration>
+    					<enumeration value="Animali Ammessi"></enumeration>
+    					<enumeration value="Servizio in camera"></enumeration>
+    					<enumeration
+    						value="Camere/struttura per ospiti disabili">
+    					</enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="checkIn" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="checkOut" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="hotelChain" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="cin" type="string" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+
+</schema>
