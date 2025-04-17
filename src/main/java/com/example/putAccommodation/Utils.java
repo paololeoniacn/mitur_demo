@@ -2,6 +2,7 @@ package com.example.putAccommodation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class Utils {
 
@@ -34,4 +35,5 @@ public class Utils {
                 identifier + ".jpg";
         return finalPath;
     }
+
 }

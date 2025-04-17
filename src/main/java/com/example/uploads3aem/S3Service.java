@@ -48,7 +48,8 @@ public class S3Service {
 
     // caricamento immagine su S3 -> TODO: aggiungere apiKey
     public void uploadImageFromUrl(String imageUrl, String finalPath) throws IOException {
-        InputStream inputStream = new URL(imageUrl).openStream();// scarica immagine da URL remoto
+        // TODO: controllare che l'immagine venga caricata in formato binario
+        InputStream inputStream = new URL(imageUrl).openStream();
         byte[] imageBytes = inputStream.readAllBytes();
         PutObjectRequest putRequest = PutObjectRequest.builder()
                 .bucket(bucketName)

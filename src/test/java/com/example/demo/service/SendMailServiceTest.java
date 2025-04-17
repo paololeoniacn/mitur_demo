@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -89,5 +90,32 @@ class SendMailServiceTest {
         });
 
         assertTrue(ex.getMessage().contains("Errore nell'invio della PEC"));
+    }
+
+    @Test
+    void testValidateWithXsdMail_validMail_shouldPass() {
+        MailRequest mailRequest = new MailRequest();
+        mailRequest.setFrom("sender@example.com");
+        mailRequest.setTo(List.of("recipient1@example.com", "recipient2@example.com"));
+        mailRequest.setCc(List.of("cc@example.com"));
+        mailRequest.setBcc(List.of("bcc@example.com"));
+        mailRequest.setReplyTo("reply@example.com");
+        mailRequest.setSubject("Test Subject");
+        mailRequest.setSentDate(new Date());
+        mailRequest.setBodyText("This is a test email body.");
+        mailRequest.setContentType("text/plain");
+
+        assertDoesNotThrow(() -> sendMailService.validateWithXsdMail(mailRequest));
+    }
+
+    @Test
+    public void validateWithXsdPECMail_shouldPassValidation() {
+        PECMailRequest request = new PECMailRequest();
+        request.setTo("destinatario@pec.it");
+        request.setSubject("Test invio PEC");
+        request.setBody("Contenuto di test per il corpo della mail PEC.");
+        request.setFullName("Mario Rossi");
+
+        assertDoesNotThrow(() -> sendMailService.validateWithXsdPECMail(request));
     }
 }

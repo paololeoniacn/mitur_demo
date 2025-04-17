@@ -1,8 +1,11 @@
 package com.example.putAccommodation;
 
 import com.example.demo.SlugifyService;
+import com.example.uploads3aem.S3Request;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -28,6 +31,9 @@ public class PutAccommodationServiceTest {
 
     @InjectMocks
     private PutAccommodationService putAccommodationService;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Test
     void testPutAccommodation_AllImagesUploadedSuccessfully() throws IOException {
@@ -60,8 +66,7 @@ public class PutAccommodationServiceTest {
     }
 
     @Test
-    void testPutAccommodation_IOExceptionOnOneImage_OthersStillUploaded() throws IOException {
-        // Arrange
+    void testPutAccommodation_UploadImages_OneFails_OthersSucceed() throws IOException {
         PutAccommodationRequest request = new PutAccommodationRequest();
         request.setName("Test Name");
         request.setRegion("Test Region");
@@ -72,29 +77,26 @@ public class PutAccommodationServiceTest {
         when(slugifyService.normalize(anyString())).thenReturn("normalized");
 
         try (MockedStatic<Utils> utilsMockedStatic = mockStatic(Utils.class)) {
+
             utilsMockedStatic.when(() -> Utils.pathBuilder(
                     anyString(), anyString(), anyString(), anyString(), anyString(), anyString()
             )).thenAnswer(invocation -> {
-                String filename = invocation.getArgument(0);
-                return "s3/path/" + filename;
+                String fileName = invocation.getArgument(0);
+                return "s3/path/" + fileName;
             });
 
-            // Simula fallimento su img2.jpg
-            doNothing().when(s3Service).uploadImageFromUrl(eq("img1.jpg"), eq("s3/path/img1.jpg"));
-            doThrow(new IOException("Simulated failure"))
-                    .when(s3Service).uploadImageFromUrl(eq("img2.jpg"), eq("s3/path/img2.jpg"));
-            doNothing().when(s3Service).uploadImageFromUrl(eq("img3.jpg"), eq("s3/path/img3.jpg"));
+            // Simula: img2 fallisce
+            doNothing().when(s3Service).uploadImageFromUrl("img1.jpg", "s3/path/img1.jpg");
+            doThrow(new IOException("Simulated failure")).when(s3Service).uploadImageFromUrl("img2.jpg", "s3/path/img2.jpg");
+            doNothing().when(s3Service).uploadImageFromUrl("img3.jpg", "s3/path/img3.jpg");
 
+            // Act
             putAccommodationService.putAccommodation(request);
 
-            // img1 e img3 dovrebbero essere caricate
-            verify(s3Service).uploadImageFromUrl(eq("img1.jpg"), eq("s3/path/img1.jpg"));
-            verify(s3Service).uploadImageFromUrl(eq("img3.jpg"), eq("s3/path/img3.jpg"));
-
-            // img2 dovrebbe essere stata tentata ma fallita (comunque chiamata)
-            verify(s3Service).uploadImageFromUrl(eq("img2.jpg"), eq("s3/path/img2.jpg"));
-
-            // In totale, 3 chiamate (una fallita)
+            // Assert: tutte le immagini tentate
+            verify(s3Service).uploadImageFromUrl("img1.jpg", "s3/path/img1.jpg");
+            verify(s3Service).uploadImageFromUrl("img2.jpg", "s3/path/img2.jpg");
+            verify(s3Service).uploadImageFromUrl("img3.jpg", "s3/path/img3.jpg");
             verify(s3Service, times(3)).uploadImageFromUrl(anyString(), anyString());
         }
     }
@@ -104,7 +106,7 @@ public class PutAccommodationServiceTest {
         PutAccommodationRequest request = getMockRequest();
         List<String> images = List.of("img1.jpg", "img2.jpg");
 
-        RenderAccommodationAEM json = putAccommodationService.renderJson(request, images);
+        RenderAccommodationAEM json = putAccommodationService.renderAccommodation(request, images);
 
         assertEquals("test-id", json.getIdentifier());
         assertEquals("img1.jpg", json.getImages().get(0));

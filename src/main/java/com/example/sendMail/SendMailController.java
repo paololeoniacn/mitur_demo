@@ -22,7 +22,7 @@ public class SendMailController {
     }
 
     @PostMapping("/mail")
-    public ResponseEntity<String> sendMail(@Valid @RequestBody MailRequest mailRequest){
+    public ResponseEntity<String> sendMail(@RequestBody MailRequest mailRequest){
         logger.info("Richiesta di invio mail ricevuta");
         try{
             sendMailService.sendMail(mailRequest);
@@ -36,7 +36,7 @@ public class SendMailController {
     }
 
     @PostMapping("/pec")
-    public ResponseEntity<String> sendPEC(@Valid @RequestBody PECMailRequest pecMailRequest){
+    public ResponseEntity<String> sendPEC(@RequestBody PECMailRequest pecMailRequest){
         logger.info("Richiesta di invio PEC ricevuta");
         try{
             sendMailService.sendPEC(pecMailRequest);

@@ -1,6 +1,7 @@
 package com.example.putAccommodation;
 
 import com.example.demo.SlugifyService;
+import com.example.uploads3aem.S3Request;
 import com.example.uploads3aem.S3Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +50,7 @@ public class PutAccommodationService {
         String normalizedRegion = slugifyService.normalize(putAccommodationRequest.getRegion());
         String normalizedCity = slugifyService.normalize(putAccommodationRequest.getCity());
 
+        // TODO: metodo per scaricare immagini
         List<String> imagesURL = putAccommodationRequest.getPhotos();
         List<String> uploadedImagePaths = new ArrayList<>();
         // Ciclo la lista di immagini e carico su S3 ogni immagine dopo aver creato il path
@@ -63,19 +65,20 @@ public class PutAccommodationService {
                 logger.info("Caricamento immagine su S3 non riuscito: " + ex.getMessage());
             }
         }
-        RenderAccommodationAEM renderAccommodationAEM = renderJson(putAccommodationRequest, uploadedImagePaths); // richiamo il metodo per la creazione del JSON da salvare su s3
+        RenderAccommodationAEM renderAccommodationAEM = renderAccommodation(putAccommodationRequest, uploadedImagePaths); // richiamo il metodo per la creazione del JSON da salvare su s3
         String finalPathJson = pathBuilderJson(true, normalizedName, normalizedCity, normalizedRegion, "/content/dam/tdh-infocamere/it/accommodations/" );  // metodo per settare il path (SetPathS3)
-        // TODO: richiamare metodo per caricare su S3 il JSON
+        String jsonString = renderJsonToString(renderAccommodationAEM);
+        S3Request s3Request = new S3Request(finalPathJson, jsonString);
+        s3Service.process(s3Request);
     }
 
-    public void postAccommodation(PutAccommodationRequest putAccommodationRequest){
+    public void postAccommodation(PutAccommodationRequest putAccommodationRequest) {
         String normalizedName = slugifyService.normalize(putAccommodationRequest.getName());
         String normalizedRegion = slugifyService.normalize(putAccommodationRequest.getRegion());
         String normalizedCity = slugifyService.normalize(putAccommodationRequest.getCity());
-
         List<String> imagesURL = putAccommodationRequest.getPhotos();
-        List<String> uploadedImagePaths = new ArrayList<>();// Ciclo la lista di immagini e carico su S3 ogni immagine dopo aver creato il path
-        for (int i = 0; i < imagesURL.size(); i++) {
+        List<String> uploadedImagePaths = new ArrayList<>();
+        for (int i = 0; i < imagesURL.size(); i++) {  // Ciclo la lista di immagini e carico su S3 ogni immagine dopo aver creato il path
             String indexPhoto = imagesURL.get(i);
             String finalPath = Utils.pathBuilder(imagesURL.get(i),normalizedName, normalizedRegion, normalizedCity, "/content/dam/tdh-infocamere/it/accommodations/", indexPhoto);
             try{
@@ -86,10 +89,11 @@ public class PutAccommodationService {
                 logger.info("Caricamento immagine su S3 non riuscito: " + ex.getMessage());
             }
         }
-
-        RenderAccommodationAEM renderAccommodationAEM = renderJson(putAccommodationRequest, uploadedImagePaths); // richiamo il metodo per la creazione del JSON da salvare su s3
+        RenderAccommodationAEM renderAccommodationAEM = renderAccommodation(putAccommodationRequest, uploadedImagePaths); // richiamo il metodo per la creazione del JSON da salvare su s3
         String finalPathJson = pathBuilderJson(false, normalizedName, normalizedCity, normalizedRegion, "/content/dam/tdh-infocamere/it/accommodations/");  // metodo per settare il path (SetPathS3)
-        // TODO: richiamare metodo per caricare su S3 il JSON
+        String jsonString = renderJsonToString(renderAccommodationAEM);
+        S3Request s3Request = new S3Request(finalPathJson, jsonString);
+        s3Service.process(s3Request);
     }
 
     // metodo per convertire l'oggetto in XML e validarlo con i file xsd
@@ -118,7 +122,7 @@ public class PutAccommodationService {
     }
 
     // metodo che crea il Json RenderAccommodationAEM da salvare su s3 mappandolo dalla request
-    public RenderAccommodationAEM renderJson (PutAccommodationRequest putAccommodationRequest, List<String> uploadedImagePaths) {
+    public RenderAccommodationAEM renderAccommodation (PutAccommodationRequest putAccommodationRequest, List<String> uploadedImagePaths) {
         RenderAccommodationAEM renderAccommodationAEM = new RenderAccommodationAEM();
         renderAccommodationAEM.setIdentifier(putAccommodationRequest.getIdentifier());
         renderAccommodationAEM.setFiscalCod(putAccommodationRequest.getFiscalCod());
@@ -181,6 +185,16 @@ public class PutAccommodationService {
         return renderAccommodationAEM;
     }
 
+    public String renderJsonToString(RenderAccommodationAEM renderAccommodationAEM){
+        String jsonString = null;
+        try {
+            jsonString = objectMapper.writeValueAsString(renderAccommodationAEM);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Errore nella creazione della stringa JSON: " + e.getMessage());
+        }
+        return jsonString;
+    }
+
     public String pathBuilderJson(Boolean isUpdate, String name, String city, String region, String initialPathAccommodation){
         String finalName = name.length() > 80 ? name.substring(0, 80) : name;
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
@@ -195,25 +209,5 @@ public class PutAccommodationService {
             return finalPath;
     }
 
-    // metodo per creare Json da mandare a CRM con la coda
-    public InputMessageToCRM renderJsonToCRM(PutAccommodationRequest putAccommodationRequest, String trackingId, Boolean isUpdate){
-        String currentTimeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
-        try {
-            String jsonRequest = objectMapper.writeValueAsString(putAccommodationRequest); // Trasformazione in stringa per invio messaggio al CRM
-            InputMessageToCRM inputMessageToCRM = new InputMessageToCRM();
-            inputMessageToCRM.setType("Accomodation");
-            if(isUpdate){
-                inputMessageToCRM.setMethod("PUT");
-            } else {
-                inputMessageToCRM.setMethod("POST");
-            }
-            inputMessageToCRM.setIdentifier(putAccommodationRequest.getIdentifier());
-            inputMessageToCRM.setCurrentTimeStamp(currentTimeStamp);
-            inputMessageToCRM.setJsonRequest(jsonRequest);
-            inputMessageToCRM.setTrackingId(trackingId);
-            return inputMessageToCRM;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Render JSON non riuscito: " + e.getMessage());
-        }
-    }
+
 }

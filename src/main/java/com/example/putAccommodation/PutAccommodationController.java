@@ -30,7 +30,6 @@ public class PutAccommodationController {
             logger.info("Richiesta di aggiornamento avvenuta con successo");
 
             // TODO: capire se inviare coda o salvare su DB
-            // putAccommodationService.renderJsonToCRM(putAccommodationRequest, trackingId, true); // richiamo il metodo per creazione messaggio a CRM
             // logger.info("Invio messaggio con trackingId: {}", trackingId);
 
             return ResponseEntity.ok("Aggiornamento avvenuto con successo");
@@ -50,7 +49,6 @@ public class PutAccommodationController {
             logger.info("Richiesta di inserimento avvenuta con successo");
 
             // TODO: capire se inviare coda o salvare su DB
-            //putAccommodationService.renderJsonToCRM(putAccommodationRequest, trackingId, false); // richiamo il metodo per creazione messaggio a CRM
             // logger.info("Invio messaggio con trackingId: {}", trackingId);
 
             return ResponseEntity.ok("Inserimento avvenuto con successo");
