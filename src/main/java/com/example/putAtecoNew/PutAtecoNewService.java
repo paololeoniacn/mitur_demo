@@ -1,12 +1,14 @@
 package com.example.putAtecoNew;
 
-import com.example.demo.Slugifier;
-import com.example.uploadImage.S3Service;
+import com.example.demo.SlugifyService;
+import com.example.putAccommodation.Utils;
+import com.example.uploads3aem.S3Service;
 import jakarta.validation.ValidationException;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jaxb.core.v2.TODO;
 import org.springframework.stereotype.Service;
 
 import javax.xml.XMLConstants;
@@ -25,32 +27,38 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class PutAtecoNewService {
 
     private final S3Service s3Service;
 
+    private final SlugifyService slugifyService;
+
     private static final Logger logger = LogManager.getLogger(PutAtecoNewService.class);
 
-    public PutAtecoNewService(S3Service s3Service){
+    public PutAtecoNewService(S3Service s3Service, SlugifyService slugifyService){
         this.s3Service = s3Service;
+        this.slugifyService = slugifyService;
     }
 
     public void postAtecoNew(PutAtecoNewRequest putAtecoNewRequest){
         // normalizzazione name, city, region -> TODO: metodo normalize da spostare dal Controller?
-        String normalizedName = Slugifier.slugify(putAtecoNewRequest.getName());
-        String normalizedRegion = Slugifier.slugify(putAtecoNewRequest.getRegion());
-        String normalizedCity = Slugifier.slugify(putAtecoNewRequest.getCity());
+        String normalizedName = slugifyService.normalize(putAtecoNewRequest.getName());
+        String normalizedRegion = slugifyService.normalize(putAtecoNewRequest.getRegion());
+        String normalizedCity = slugifyService.normalize(putAtecoNewRequest.getCity());
 
         List<String> imagesURL = putAtecoNewRequest.getPhotos();
         List<String> uploadedImagePaths = new ArrayList<>();
-        for(String imageURL : imagesURL){
+        for(int i = 0; i < imagesURL.size(); i++){
             String initialPath = getInitialPath(putAtecoNewRequest);
-            String finalPath = s3Service.pathBuilder(imageURL, normalizedName, normalizedRegion, normalizedCity, initialPath);
+            String indexPhoto = imagesURL.get(i);
+            String finalPath = Utils.pathBuilder(imagesURL.get(i), normalizedName, normalizedRegion, normalizedCity, initialPath, indexPhoto);
             try{
-                s3Service.uploadImageFromUrl(imageURL, "bucketName", finalPath);
+                s3Service.uploadImageFromUrl(imagesURL.get(i), finalPath);
                 uploadedImagePaths.add(finalPath);
+                logger.info("Immagine {} caricata correttamente", indexPhoto);
             } catch(IOException ex){
                 logger.info("Caricamento immagine su S3 non riuscito: " + ex.getMessage());
             }
@@ -63,24 +71,25 @@ public class PutAtecoNewService {
 
     public void putAtecoNew(PutAtecoNewRequest putAtecoNewRequest){
         // normalizzazione name, city, region -> TODO: metodo normalize da spostare dal Controller?
-        String normalizedName = Slugifier.slugify(putAtecoNewRequest.getName());
-        String normalizedRegion = Slugifier.slugify(putAtecoNewRequest.getRegion());
-        String normalizedCity = Slugifier.slugify(putAtecoNewRequest.getCity());
+        String normalizedName = slugifyService.normalize(putAtecoNewRequest.getName());
+        String normalizedRegion = slugifyService.normalize(putAtecoNewRequest.getRegion());
+        String normalizedCity = slugifyService.normalize(putAtecoNewRequest.getCity());
 
         List<String> imagesURL = putAtecoNewRequest.getPhotos();
-        List<String> uploadedImagePaths = new ArrayList<>(); // Ciclo la lista di immagini e carico su S3 ogni immagine dopo aver creato il path
-        for(String imageURL : imagesURL){
+        List<String> uploadedImagePaths = new ArrayList<>();
+        for(int i = 0; i < imagesURL.size(); i++){
             String initialPath = getInitialPath(putAtecoNewRequest);
-            String finalPath = s3Service.pathBuilder(imageURL,normalizedName, normalizedRegion, normalizedCity, "initialPath");
+            String indexPhoto = imagesURL.get(i);
+            String finalPath = Utils.pathBuilder(imagesURL.get(i), normalizedName, normalizedRegion, normalizedCity, initialPath, indexPhoto);
             try{
-                s3Service.uploadImageFromUrl(imageURL, "bucketName", finalPath);
+                s3Service.uploadImageFromUrl(imagesURL.get(i), finalPath);
+                logger.info("Immagine {} caricata correttamente", indexPhoto);
                 uploadedImagePaths.add(finalPath);
             } catch(IOException ex){
                 logger.info("Caricamento immagine su S3 non riuscito: " + ex.getMessage());
             }
         }
         RenderAtecoNewAEM renderAtecoNewAEM = renderJson(putAtecoNewRequest, uploadedImagePaths);
-        // TODO: creare metodo per settare path per il JSON (isUpdate true)
         String initialPathJson = getInitialPath(putAtecoNewRequest);
         String finalPathJson = pathBuilderJson(true, normalizedName, normalizedCity, normalizedRegion, initialPathJson);
         // TODO: richiamare metodo per caricare su S3 il JSON
@@ -275,7 +284,5 @@ public class PutAtecoNewService {
         return destinationMap.getOrDefault(initialPath, "_food-and-wine_");
     }
 
-    public void mapPeriods(PutAtecoNewRequest putAtecoNewRequest, RenderAtecoNewAEM renderAtecoNewAEM){
-        putAtecoNewRequest.getOpeningHoursType().getMon();
-    }
+
 }

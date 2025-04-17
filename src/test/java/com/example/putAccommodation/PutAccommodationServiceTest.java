@@ -1,14 +1,14 @@
 package com.example.putAccommodation;
 
 import com.example.demo.SlugifyService;
-import com.example.uploadImage.S3Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-
-import jakarta.validation.ValidationException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import com.example.uploads3aem.S3Service;
+import jakarta.validation.ValidationException;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,44 +17,86 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class PutAccommodationServiceTest {
-    private S3Service s3Service;
-    private ObjectMapper objectMapper;
+
+    @Mock
     private SlugifyService slugifyService;
+
+    @Mock
+    private S3Service s3Service;
+
+    @InjectMocks
     private PutAccommodationService putAccommodationService;
 
-    @BeforeEach
-    void setUp() {
-        s3Service = mock(S3Service.class);
-        objectMapper = mock(ObjectMapper.class);
-        slugifyService = mock(SlugifyService.class);
-        putAccommodationService = new PutAccommodationService(s3Service, objectMapper, slugifyService);
+    @Test
+    void testPutAccommodation_AllImagesUploadedSuccessfully() throws IOException {
+        // Arrange
+        PutAccommodationRequest request = new PutAccommodationRequest();
+        request.setName("Test Name");
+        request.setRegion("Test Region");
+        request.setCity("Test City");
+        List<String> photos = List.of("img1.jpg", "img2.jpg", "img3.jpg");
+        request.setPhotos(photos);
+
+        when(slugifyService.normalize(anyString())).thenReturn("normalized");
+
+        try (MockedStatic<Utils> utilsMockedStatic = mockStatic(Utils.class)) {
+            utilsMockedStatic.when(() -> Utils.pathBuilder(
+                    anyString(), anyString(), anyString(), anyString(), anyString(), anyString()
+            )).thenAnswer(invocation -> {
+                String filename = invocation.getArgument(0);
+                return "s3/path/" + filename;
+            });
+
+            putAccommodationService.putAccommodation(request);
+
+            for (String photo : photos) {
+                verify(s3Service).uploadImageFromUrl(eq(photo), eq("s3/path/" + photo));
+            }
+
+            verify(s3Service, times(photos.size())).uploadImageFromUrl(anyString(), anyString());
+        }
     }
 
     @Test
-    void testPutAccommodation_AllFieldsCorrectlySet() throws IOException {
-        PutAccommodationRequest request = getMockRequest();
+    void testPutAccommodation_IOExceptionOnOneImage_OthersStillUploaded() throws IOException {
+        // Arrange
+        PutAccommodationRequest request = new PutAccommodationRequest();
+        request.setName("Test Name");
+        request.setRegion("Test Region");
+        request.setCity("Test City");
+        List<String> photos = List.of("img1.jpg", "img2.jpg", "img3.jpg");
+        request.setPhotos(photos);
+
         when(slugifyService.normalize(anyString())).thenReturn("normalized");
-        when(s3Service.pathBuilder(anyString(), anyString(), anyString(), anyString(), anyString()))
-                .thenReturn("s3/path/image.jpg");
 
-        putAccommodationService.putAccommodation(request);
+        try (MockedStatic<Utils> utilsMockedStatic = mockStatic(Utils.class)) {
+            utilsMockedStatic.when(() -> Utils.pathBuilder(
+                    anyString(), anyString(), anyString(), anyString(), anyString(), anyString()
+            )).thenAnswer(invocation -> {
+                String filename = invocation.getArgument(0);
+                return "s3/path/" + filename;
+            });
 
-        verify(s3Service, times(request.getPhotos().size()))
-                .uploadImageFromUrl(anyString(), eq("bucketName"), eq("s3/path/image.jpg"));
-    }
+            // Simula fallimento su img2.jpg
+            doNothing().when(s3Service).uploadImageFromUrl(eq("img1.jpg"), eq("s3/path/img1.jpg"));
+            doThrow(new IOException("Simulated failure"))
+                    .when(s3Service).uploadImageFromUrl(eq("img2.jpg"), eq("s3/path/img2.jpg"));
+            doNothing().when(s3Service).uploadImageFromUrl(eq("img3.jpg"), eq("s3/path/img3.jpg"));
 
-    @Test
-    void testPostAccommodation_AllFieldsCorrectlySet() throws IOException {
-        PutAccommodationRequest request = getMockRequest();
-        when(slugifyService.normalize(anyString())).thenReturn("normalized");
-        when(s3Service.pathBuilder(anyString(), anyString(), anyString(), anyString(), anyString()))
-                .thenReturn("s3/path/image.jpg");
+            putAccommodationService.putAccommodation(request);
 
-        putAccommodationService.postAccommodation(request);
+            // img1 e img3 dovrebbero essere caricate
+            verify(s3Service).uploadImageFromUrl(eq("img1.jpg"), eq("s3/path/img1.jpg"));
+            verify(s3Service).uploadImageFromUrl(eq("img3.jpg"), eq("s3/path/img3.jpg"));
 
-        verify(s3Service, times(request.getPhotos().size()))
-                .uploadImageFromUrl(anyString(), eq("bucketName"), eq("s3/path/image.jpg"));
+            // img2 dovrebbe essere stata tentata ma fallita (comunque chiamata)
+            verify(s3Service).uploadImageFromUrl(eq("img2.jpg"), eq("s3/path/img2.jpg"));
+
+            // In totale, 3 chiamate (una fallita)
+            verify(s3Service, times(3)).uploadImageFromUrl(anyString(), anyString());
+        }
     }
 
     @Test
@@ -84,7 +126,7 @@ public class PutAccommodationServiceTest {
 
     @Test
     void testValidateWithXsd_InvalidRequest_ThrowsException() {
-        PutAccommodationRequest request = new PutAccommodationRequest(); // Empty request likely to fail
+        PutAccommodationRequest request = new PutAccommodationRequest();
         assertThrows(ValidationException.class, () -> putAccommodationService.validateWithXsd(request));
     }
 
@@ -93,7 +135,6 @@ public class PutAccommodationServiceTest {
         PutAccommodationRequest request = getValidPutAccommodationRequest();
         assertDoesNotThrow(() -> putAccommodationService.validateWithXsd(request));
     }
-
 
     private PutAccommodationRequest getMockRequest() {
         PutAccommodationRequest request = new PutAccommodationRequest();
@@ -143,4 +184,5 @@ public class PutAccommodationServiceTest {
 
         return request;
     }
+
 }
