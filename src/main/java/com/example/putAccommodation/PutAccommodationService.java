@@ -1,7 +1,7 @@
 package com.example.putAccommodation;
 
 import com.example.demo.SlugifyService;
-import com.example.putAccommodation.dto.RenderAccommodationAEM;
+import com.example.putAccommodation.RenderAccommodationAEM;
 import com.example.uploads3aem.S3Request;
 import com.example.uploads3aem.S3Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
