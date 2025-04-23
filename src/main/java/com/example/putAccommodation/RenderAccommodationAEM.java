@@ -1,4 +1,4 @@
-package com.example.putAccommodation;
+package com.example.putAccommodation.dto;
 
 import lombok.Data;
 

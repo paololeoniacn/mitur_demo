@@ -1,6 +1,6 @@
 package com.example.putAtecoNew;
 
-import com.example.putAccommodation.PutAccommodationRequest;
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -22,35 +22,13 @@ public class PutAtecoNewController {
         this.putAtecoNewService = putAtecoNewService;
     }
 
-    @PostMapping
-    public ResponseEntity<String> postAtecoNew(@RequestBody PutAtecoNewRequest putAtecoNewRequest){
-        String trackingId = String.valueOf(UUID.randomUUID());
-        try{
-            putAtecoNewService.validateWithXsd(putAtecoNewRequest); // validazione dell'input
-            putAtecoNewService.postAtecoNew(putAtecoNewRequest); //richiamo metodo putAccommodation del Service
-            logger.info("Richiesta di inserimento avvenuta con successo");
-
-            // TODO: capire se inviare coda o salvare su DB
-
-            return ResponseEntity.ok("Inserimento avvenuto con successo");
-        }catch(ResourceAccessException ex){
-            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Timeout nel contattare il servizio esterno: " + ex.getMessage());
-        }catch(Exception ex){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore interno al servizio: " + ex.getMessage());
-        }
-    }
-
     @PutMapping
-    public ResponseEntity<String> putAtecoNew(@RequestBody PutAtecoNewRequest putAtecoNewRequest){
-        String trackingId = String.valueOf(UUID.randomUUID());
+    public ResponseEntity<String> putAtecoNew(@RequestBody @Valid PutAtecoNewRequest putAtecoNewRequest){
         try{
-            putAtecoNewService.validateWithXsd(putAtecoNewRequest); // validazione dell'input
-            putAtecoNewService.putAtecoNew(putAtecoNewRequest); //richiamo metodo putAccommodation del Service
+            putAtecoNewService.putAtecoNew(putAtecoNewRequest);
             logger.info("Richiesta di aggiornamento avvenuta con successo");
 
-            // TODO: capire se inviare coda o salvare su DB
-            //putAccommodationService.renderJsonToCRM(putAccommodationRequest, trackingId, false); // richiamo il metodo per creazione messaggio a CRM
-            // logger.info("Invio messaggio con trackingId: {}", trackingId);
+            // TODO: salvare request su DB
 
             return ResponseEntity.ok("Aggiornamento avvenuto con successo");
         }catch(ResourceAccessException ex){
@@ -60,5 +38,19 @@ public class PutAtecoNewController {
         }
     }
 
+    @PostMapping
+    public ResponseEntity<String> postAtecoNew(@RequestBody @Valid PutAtecoNewRequest putAtecoNewRequest){
+        try{
+            putAtecoNewService.postAtecoNew(putAtecoNewRequest);
+            logger.info("Richiesta di inserimento avvenuta con successo");
 
+            // TODO: salvare request su DB
+
+            return ResponseEntity.ok("Inserimento avvenuto con successo");
+        }catch(ResourceAccessException ex){
+            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Timeout nel contattare il servizio esterno: " + ex.getMessage());
+        }catch(Exception ex){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore interno al servizio: " + ex.getMessage());
+        }
+    }
 }

@@ -1,10 +1,23 @@
 package com.example.putAccommodation;
 
+import com.example.putAtecoNew.*;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Utils {
+
+    @Value("${api.key}")
+    private static String apiKey;
 
     public static String assignIdentifierPhoto(String imageUrl){
         int downloadIndex = imageUrl.indexOf("/download");
@@ -20,7 +33,7 @@ public class Utils {
     }
 
     public static String pathBuilder(String imageUrl, String name, String region, String city, String initialPath, String indexPhoto){
-        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE); // setta la data e ora corrente
+        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME); // setta la data e ora corrente
 
         String identifier = assignIdentifierPhoto(imageUrl);
 
@@ -35,5 +48,29 @@ public class Utils {
                 identifier + ".jpg";
         return finalPath;
     }
+
+    public static byte[] downloadImage(String imageUrl) throws Exception{
+        URL url = new URL(imageUrl); // Crea l'URL da dove scaricare l'immagine
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection(); // Apre la connessione HTTP
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("X-API-Key", apiKey); // Aggiunge ApiKey all'intestazione della richiesta
+        // System.out.println("API Key: " + apiKey);
+        int status = connection.getResponseCode();
+        // System.out.println("Status Code: " + status);
+
+        if (status != 200) {
+            throw new RuntimeException("Errore HTTP: " + status);
+        }
+
+        try (InputStream inputStream = connection.getInputStream(); // Ottiene l'input stream dalla connessione
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) { // Legge i dati in byte
+            int byteRead;
+            while ((byteRead = inputStream.read()) != -1) {
+                outputStream.write(byteRead);
+            }
+            return outputStream.toByteArray();  // Restituisce i byte dell'immagine
+        }
+    }
+
 
 }

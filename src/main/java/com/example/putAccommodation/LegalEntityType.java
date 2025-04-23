@@ -1,25 +1,14 @@
 package com.example.putAccommodation;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
 import lombok.Data;
 
 @Data
-@XmlAccessorType(XmlAccessType.FIELD)
 public class LegalEntityType {
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private String country;
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private String province;
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private String city;
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private String zipCode;
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private String address;
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private String civicNumber;
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private String emailPEC;
 }

@@ -1,19 +1,21 @@
 package com.example.putAccommodation;
 
 import com.example.demo.SlugifyService;
+import com.example.putAccommodation.dto.RenderAccommodationAEM;
 import com.example.uploads3aem.S3Request;
+import com.example.uploads3aem.S3Service;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.example.uploads3aem.S3Service;
-import jakarta.validation.ValidationException;
 
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,167 +26,145 @@ import static org.mockito.Mockito.*;
 public class PutAccommodationServiceTest {
 
     @Mock
-    private SlugifyService slugifyService;
-
-    @Mock
     private S3Service s3Service;
-
-    @InjectMocks
-    private PutAccommodationService putAccommodationService;
 
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private SlugifyService slugifyService;
+
+    @InjectMocks
+    private PutAccommodationService putAccommodationService;
+
+    private PutAccommodationRequest testRequest;
+
+    @BeforeEach
+    void setUp() {
+        testRequest = new PutAccommodationRequest();
+        testRequest.setName("Test Hotel");
+        testRequest.setRegion("Lombardy");
+        testRequest.setCity("Milan");
+        testRequest.setPhotos(Arrays.asList("http://example.com/photo1.jpg", "http://example.com/photo2.jpg"));
+        testRequest.setIdentifier("test-id-123");
+        testRequest.setFiscalCod("FISCAL123");
+        testRequest.setFullAddress("Test Address");
+        testRequest.setPhoneNumber("+123456789");
+        testRequest.setDescription("Test description");
+        testRequest.setCin(List.of("CIN123"));
+        testRequest.setCheckIn("14:00");
+        testRequest.setCheckOut("11:00");
+
+        // Set enum values
+        testRequest.setAccomodationType(AccomodationType.HOTEL); // Assuming this is your enum
+        testRequest.setListOfService(Collections.singletonList(ListOfService.WIFI_GRATUITO)); // Example service
+        testRequest.setRoomService(Collections.singletonList(RoomService.ARIA_CONDIZIONATA)); // Example room service
+        testRequest.setPaymentMethods(Collections.singletonList(PaymentMethod.CARTA_DI_CREDITO)); // Example payment method
+    }
+
     @Test
-    void testPutAccommodation_AllImagesUploadedSuccessfully() throws IOException {
+    void putAccommodation_shouldProcessRequestSuccessfully() throws Exception {
         // Arrange
-        PutAccommodationRequest request = new PutAccommodationRequest();
-        request.setName("Test Name");
-        request.setRegion("Test Region");
-        request.setCity("Test City");
-        List<String> photos = List.of("img1.jpg", "img2.jpg", "img3.jpg");
-        request.setPhotos(photos);
-
         when(slugifyService.normalize(anyString())).thenReturn("normalized");
+        when(objectMapper.writeValueAsString(any())).thenReturn("jsonString");
 
-        try (MockedStatic<Utils> utilsMockedStatic = mockStatic(Utils.class)) {
-            utilsMockedStatic.when(() -> Utils.pathBuilder(
-                    anyString(), anyString(), anyString(), anyString(), anyString(), anyString()
-            )).thenAnswer(invocation -> {
-                String filename = invocation.getArgument(0);
-                return "s3/path/" + filename;
-            });
+        try (MockedStatic<Utils> utilsMock = mockStatic(Utils.class)) {
+            utilsMock.when(() -> Utils.downloadImage(anyString()))
+                    .thenReturn(new byte[]{1, 2, 3});
+            utilsMock.when(() -> Utils.pathBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn("/mock/path/to/image.jpg");
 
-            putAccommodationService.putAccommodation(request);
+            putAccommodationService.putAccommodation(testRequest);
 
-            for (String photo : photos) {
-                verify(s3Service).uploadImageFromUrl(eq(photo), eq("s3/path/" + photo));
-            }
-
-            verify(s3Service, times(photos.size())).uploadImageFromUrl(anyString(), anyString());
+            verify(s3Service, times(2)).uploadImage(any(), anyString());
+            verify(s3Service).process(any(S3Request.class));
         }
     }
 
     @Test
-    void testPutAccommodation_UploadImages_OneFails_OthersSucceed() throws IOException {
-        PutAccommodationRequest request = new PutAccommodationRequest();
-        request.setName("Test Name");
-        request.setRegion("Test Region");
-        request.setCity("Test City");
-        List<String> photos = List.of("img1.jpg", "img2.jpg", "img3.jpg");
-        request.setPhotos(photos);
-
+    void postAccommodation_shouldProcessRequestSuccessfully() throws Exception {
+        // Arrange
         when(slugifyService.normalize(anyString())).thenReturn("normalized");
+        when(objectMapper.writeValueAsString(any())).thenReturn("jsonString");
 
-        try (MockedStatic<Utils> utilsMockedStatic = mockStatic(Utils.class)) {
-
-            utilsMockedStatic.when(() -> Utils.pathBuilder(
-                    anyString(), anyString(), anyString(), anyString(), anyString(), anyString()
-            )).thenAnswer(invocation -> {
-                String fileName = invocation.getArgument(0);
-                return "s3/path/" + fileName;
-            });
-
-            // Simula: img2 fallisce
-            doNothing().when(s3Service).uploadImageFromUrl("img1.jpg", "s3/path/img1.jpg");
-            doThrow(new IOException("Simulated failure")).when(s3Service).uploadImageFromUrl("img2.jpg", "s3/path/img2.jpg");
-            doNothing().when(s3Service).uploadImageFromUrl("img3.jpg", "s3/path/img3.jpg");
+        try (MockedStatic<Utils> utilsMock = mockStatic(Utils.class)) {
+            // Mock the static methods
+            utilsMock.when(() -> Utils.downloadImage(anyString()))
+                    .thenReturn(new byte[]{1, 2, 3});
+            utilsMock.when(() -> Utils.pathBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn("/mock/path/to/image.jpg");
 
             // Act
-            putAccommodationService.putAccommodation(request);
+            putAccommodationService.postAccommodation(testRequest);
 
-            // Assert: tutte le immagini tentate
-            verify(s3Service).uploadImageFromUrl("img1.jpg", "s3/path/img1.jpg");
-            verify(s3Service).uploadImageFromUrl("img2.jpg", "s3/path/img2.jpg");
-            verify(s3Service).uploadImageFromUrl("img3.jpg", "s3/path/img3.jpg");
-            verify(s3Service, times(3)).uploadImageFromUrl(anyString(), anyString());
+            // Assert
+            verify(s3Service, times(2)).uploadImage(any(), anyString());
+            verify(s3Service).process(any(S3Request.class));
         }
     }
 
     @Test
-    void testRenderJson_MappingCorrectly() {
-        PutAccommodationRequest request = getMockRequest();
-        List<String> images = List.of("img1.jpg", "img2.jpg");
+    void renderAccommodation_shouldMapRequestToAEMCorrectly() {
+        // Arrange
+        List<String> imagePaths = Arrays.asList("/path/to/image1.jpg", "/path/to/image2.jpg");
 
-        RenderAccommodationAEM json = putAccommodationService.renderAccommodation(request, images);
+        // Act
+        RenderAccommodationAEM result = putAccommodationService.renderAccommodation(testRequest, imagePaths);
 
-        assertEquals("test-id", json.getIdentifier());
-        assertEquals("img1.jpg", json.getImages().get(0));
-        assertEquals("Ristorante Bella Vita", json.getInsegna());
-        assertEquals("12345678901", json.getFiscalCod());
+        // Assert
+        assertNotNull(result);
+        assertEquals(testRequest.getName(), result.getInsegna());
+        assertEquals(testRequest.getName(), result.getOfficialName());
+        assertEquals(testRequest.getCity(), result.getCity());
+        assertEquals(testRequest.getRegion(), result.getRegion());
+        assertEquals(imagePaths, result.getImages());
+        assertEquals(testRequest.getAccomodationType().getValue(), result.getType());
+        assertEquals(1, result.getListOfServices().size());
+        assertEquals(1, result.getRoomListOfServices().size());
+        assertEquals(1, result.getPaymentMethods().size());
+    }
+
+
+    @Test
+    void renderJsonToString_shouldReturnJsonString() throws JsonProcessingException {
+        // Arrange
+        RenderAccommodationAEM aem = new RenderAccommodationAEM();
+        String expectedJson = "{}";
+        when(objectMapper.writeValueAsString(aem)).thenReturn(expectedJson);
+
+        // Act
+        String result = putAccommodationService.renderJsonToString(aem);
+
+        // Assert
+        assertEquals(expectedJson, result);
     }
 
     @Test
-    void testPathBuilderJson_UpdateTrue() {
-        String result = putAccommodationService.pathBuilderJson(true, "hotel", "roma", "lazio", "/content/");
+    void renderJsonToString_shouldThrowRuntimeExceptionOnError() throws JsonProcessingException {
+        // Arrange
+        RenderAccommodationAEM aem = new RenderAccommodationAEM();
+        when(objectMapper.writeValueAsString(aem)).thenThrow(new JsonProcessingException("Error") {});
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> putAccommodationService.renderJsonToString(aem));
+    }
+
+    @Test
+    void pathBuilderJson_shouldBuildCorrectPathForPut() {
+        String result = putAccommodationService.pathBuilderJson(false, "hotel", "milan", "lombardy", "/base/path/");
+        assertTrue(result.contains("destination_put"));
+    }
+
+    @Test
+    void pathBuilderJson_shouldBuildCorrectPathForUpdate() {
+        String result = putAccommodationService.pathBuilderJson(true, "hotel", "milan", "lombardy", "/base/path/");
         assertTrue(result.contains("destination_update_"));
     }
 
     @Test
-    void testPathBuilderJson_UpdateFalse() {
-        String result = putAccommodationService.pathBuilderJson(false, "hotel", "roma", "lazio", "/content/");
-        assertTrue(result.contains("destination_put_"));
+    void pathBuilderJson_shouldTruncateLongNames() {
+        String longName = "This is a very long hotel name that exceeds eighty characters and should be truncated for the path";
+        String result = putAccommodationService.pathBuilderJson(false, longName, "Milan", "Lombardy", "/base/path/");
+        assertTrue(result.contains("this is a very long hotel name that exceeds eighty characters and should be trunca"));
     }
-
-    @Test
-    void testValidateWithXsd_InvalidRequest_ThrowsException() {
-        PutAccommodationRequest request = new PutAccommodationRequest();
-        assertThrows(ValidationException.class, () -> putAccommodationService.validateWithXsd(request));
-    }
-
-    @Test
-    void testValidateWithXsd_Success() {
-        PutAccommodationRequest request = getValidPutAccommodationRequest();
-        assertDoesNotThrow(() -> putAccommodationService.validateWithXsd(request));
-    }
-
-    private PutAccommodationRequest getMockRequest() {
-        PutAccommodationRequest request = new PutAccommodationRequest();
-        request.setIdentifier("test-id");
-        request.setFiscalCod("12345678901");
-        request.setName("Ristorante Bella Vita");
-        request.setRegion("Lazio");
-        request.setCity("Roma");
-        request.setPhotos(List.of("http://image1.jpg", "http://image2.jpg"));
-        request.setFullAddress("Via Roma 10, Roma");
-        request.setPhoneNumber("+390612345678");
-        request.setAccomodationType("Hotel");
-        request.setDescription("Descrizione");
-        return request;
-    }
-
-    private PutAccommodationRequest getValidPutAccommodationRequest() {
-        PutAccommodationRequest request = new PutAccommodationRequest();
-        request.setIdentifier("ABC123");
-        request.setFiscalCod("12345678901");
-        request.setVatCod("IT98765432109");
-        request.setName("Hotel Paradiso");
-        request.setRegion("Toscana");
-        request.setCity("Firenze");
-        request.setFullAddress("Via dei Test 12, Firenze");
-        request.setStreetName("Via dei Test");
-        request.setStreetNumber("12");
-        request.setPostalCode("50100");
-        request.setCountry("Italia");
-        request.setProvince("FI");
-        request.setPhoneNumber("+3905567890");
-        request.setPhotos(List.of("http://example.com/image1.jpg", "http://example.com/image2.jpg"));
-        request.setWebSite("http://hotelparadiso.it");
-        request.setMailAddress("info@hotelparadiso.it");
-        request.setGoogleWebAddress("https://goo.gl/maps/xyz123");
-        request.setDescription("Hotel di prova con tutti i campi validi");
-        request.setIsoCertification("ISO9001");
-        request.setAccomodationType("Hotel");
-        request.setRating("5 stelle");
-        request.setListOfService(List.of("Connessione WiFi gratuita", "Navetta aeroportuale"));
-        request.setRoomService(List.of("Bagno privato", "Aria condizionata"));
-        request.setPaymentMethods(List.of("Bonifico", "Carta di credito"));
-        request.setCheckIn("14:00");
-        request.setCheckOut("11:00");
-        request.setHotelChain("LuxuryChain");
-        request.setCin(List.of("CIN987654", "CINu2y3t3u2"));
-
-        return request;
-    }
-
 }

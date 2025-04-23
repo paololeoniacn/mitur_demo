@@ -1,5 +1,6 @@
 package com.example.putAccommodation;
 
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -7,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResourceAccessException;
 
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/putAccommodation")
@@ -22,15 +22,12 @@ public class PutAccommodationController {
     }
 
     @PutMapping
-    public ResponseEntity<String> putAccommodation(@RequestBody PutAccommodationRequest putAccommodationRequest){
-        String trackingId = String.valueOf(UUID.randomUUID());
+    public ResponseEntity<String> putAccommodation(@RequestBody @Valid PutAccommodationRequest putAccommodationRequest){
         try{
-            putAccommodationService.validateWithXsd(putAccommodationRequest); // validazione dell'input
             putAccommodationService.putAccommodation(putAccommodationRequest); //richiamo metodo putAccommodation del Service
             logger.info("Richiesta di aggiornamento avvenuta con successo");
 
-            // TODO: capire se inviare coda o salvare su DB
-            // logger.info("Invio messaggio con trackingId: {}", trackingId);
+            // TODO: salvare request su DB
 
             return ResponseEntity.ok("Aggiornamento avvenuto con successo");
         }catch(ResourceAccessException ex){
@@ -41,15 +38,12 @@ public class PutAccommodationController {
     }
 
     @PostMapping
-    public ResponseEntity<String> postAccommodation(@RequestBody PutAccommodationRequest putAccommodationRequest){
-        String trackingId = String.valueOf(UUID.randomUUID());
+    public ResponseEntity<String> postAccommodation(@RequestBody @Valid PutAccommodationRequest putAccommodationRequest){
         try{
-            putAccommodationService.validateWithXsd(putAccommodationRequest); // validazione dell'input
             putAccommodationService.postAccommodation(putAccommodationRequest); //richiamo metodo postAccommodation del Service
             logger.info("Richiesta di inserimento avvenuta con successo");
 
-            // TODO: capire se inviare coda o salvare su DB
-            // logger.info("Invio messaggio con trackingId: {}", trackingId);
+            // TODO: salvare request su DB
 
             return ResponseEntity.ok("Inserimento avvenuto con successo");
         }catch(ResourceAccessException ex){

@@ -37,7 +37,7 @@ public class PutAccommodationControllerTest {
             request.setPhotos(List.of("http://image1.jpg", "http://image2.jpg"));
             request.setFullAddress("Via Roma 10, Roma");
             request.setPhoneNumber("+390612345678");
-            request.setAccomodationType("Hotel");
+            request.setAccomodationType(AccomodationType.HOTEL);
             request.setDescription("Descrizione");
             return request;
         }
@@ -45,7 +45,6 @@ public class PutAccommodationControllerTest {
         @Test
         void testPutAccommodation_Success() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
             doNothing().when(putAccommodationService).putAccommodation(request);
 
             ResponseEntity<String> response = putAccommodationController.putAccommodation(request);
@@ -58,7 +57,6 @@ public class PutAccommodationControllerTest {
         @Test
         void testPutAccommodation_Failure() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
             doThrow(new RuntimeException("Internal error")).when(putAccommodationService).putAccommodation(request);
 
             ResponseEntity<String> response = putAccommodationController.putAccommodation(request);
@@ -70,7 +68,6 @@ public class PutAccommodationControllerTest {
         @Test
         void testPostAccommodation_Success() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
             doNothing().when(putAccommodationService).postAccommodation(request);
 
             ResponseEntity<String> response = putAccommodationController.postAccommodation(request);
@@ -83,7 +80,6 @@ public class PutAccommodationControllerTest {
         @Test
         void testPostAccommodation_Failure() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
             doThrow(new RuntimeException("Internal error")).when(putAccommodationService).postAccommodation(request);
 
             ResponseEntity<String> response = putAccommodationController.postAccommodation(request);
@@ -95,7 +91,6 @@ public class PutAccommodationControllerTest {
         @Test
         void testPutAccommodation_Timeout() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
             doThrow(new ResourceAccessException("Timeout")).when(putAccommodationService).putAccommodation(request);
 
             ResponseEntity<String> response = putAccommodationController.putAccommodation(request);
@@ -107,7 +102,6 @@ public class PutAccommodationControllerTest {
         @Test
         void testPostAccommodation_Timeout() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
             doThrow(new ResourceAccessException("Timeout")).when(putAccommodationService).postAccommodation(request);
 
             ResponseEntity<String> response = putAccommodationController.postAccommodation(request);
