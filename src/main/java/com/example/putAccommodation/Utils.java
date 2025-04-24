@@ -1,6 +1,5 @@
 package com.example.putAccommodation;
 
-import com.example.putAtecoNew.*;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.ByteArrayOutputStream;
@@ -9,10 +8,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Utils {
 
@@ -33,7 +28,7 @@ public class Utils {
     }
 
     public static String pathBuilder(String imageUrl, String name, String region, String city, String initialPath, String indexPhoto){
-        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME); // setta la data e ora corrente
+        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")); // setta la data e ora corrente
 
         String identifier = assignIdentifierPhoto(imageUrl);
 
@@ -71,6 +66,5 @@ public class Utils {
             return outputStream.toByteArray();  // Restituisce i byte dell'immagine
         }
     }
-
 
 }

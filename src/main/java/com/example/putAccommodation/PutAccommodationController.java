@@ -24,7 +24,7 @@ public class PutAccommodationController {
     @PutMapping
     public ResponseEntity<String> putAccommodation(@RequestBody @Valid PutAccommodationRequest putAccommodationRequest){
         try{
-            putAccommodationService.putAccommodation(putAccommodationRequest); //richiamo metodo putAccommodation del Service
+            putAccommodationService.putAccommodation(putAccommodationRequest, true); //richiamo metodo putAccommodation del Service
             logger.info("Richiesta di aggiornamento avvenuta con successo");
 
             // TODO: salvare request su DB
@@ -40,7 +40,7 @@ public class PutAccommodationController {
     @PostMapping
     public ResponseEntity<String> postAccommodation(@RequestBody @Valid PutAccommodationRequest putAccommodationRequest){
         try{
-            putAccommodationService.postAccommodation(putAccommodationRequest); //richiamo metodo postAccommodation del Service
+            putAccommodationService.putAccommodation(putAccommodationRequest, false); //richiamo metodo postAccommodation del Service
             logger.info("Richiesta di inserimento avvenuta con successo");
 
             // TODO: salvare request su DB

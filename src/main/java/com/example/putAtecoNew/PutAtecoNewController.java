@@ -8,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResourceAccessException;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/putAtecoNew")
 public class PutAtecoNewController {
@@ -25,7 +23,7 @@ public class PutAtecoNewController {
     @PutMapping
     public ResponseEntity<String> putAtecoNew(@RequestBody @Valid PutAtecoNewRequest putAtecoNewRequest){
         try{
-            putAtecoNewService.putAtecoNew(putAtecoNewRequest);
+            putAtecoNewService.putAtecoNew(putAtecoNewRequest, true);
             logger.info("Richiesta di aggiornamento avvenuta con successo");
 
             // TODO: salvare request su DB
@@ -41,7 +39,7 @@ public class PutAtecoNewController {
     @PostMapping
     public ResponseEntity<String> postAtecoNew(@RequestBody @Valid PutAtecoNewRequest putAtecoNewRequest){
         try{
-            putAtecoNewService.postAtecoNew(putAtecoNewRequest);
+            putAtecoNewService.putAtecoNew(putAtecoNewRequest, false);
             logger.info("Richiesta di inserimento avvenuta con successo");
 
             // TODO: salvare request su DB

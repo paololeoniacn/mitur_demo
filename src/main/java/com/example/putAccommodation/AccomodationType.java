@@ -2,7 +2,6 @@ package com.example.putAccommodation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.Data;
 
 public enum AccomodationType {
     HOTEL("Hotel"),

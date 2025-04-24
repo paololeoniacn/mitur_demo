@@ -36,7 +36,7 @@ public class PutAtecoNewService {
         this.objectMapper = objectMapper;
     }
 
-    public void putAtecoNew(PutAtecoNewRequest putAtecoNewRequest){
+    public void putAtecoNew(PutAtecoNewRequest putAtecoNewRequest, boolean isUpdate){
         String normalizedName = slugifyService.normalize(putAtecoNewRequest.getName());
         String normalizedRegion = slugifyService.normalize(putAtecoNewRequest.getRegion());
         String normalizedCity = slugifyService.normalize(putAtecoNewRequest.getCity());
@@ -54,54 +54,22 @@ public class PutAtecoNewService {
                 s3Service.uploadImage(imageBytes, finalPath);
                 uploadedImagePaths.add(finalPath);
                 logger.info("Immagine {} caricata correttamente al path {}", indexPhoto, finalPath);
-                //logger.info("[MOCK] Simulazione upload immagine al path: {}", finalPath);
+                // logger.info("[MOCK] Simulazione upload immagine al path: {}", finalPath);
             } catch(Exception ex){
                 logger.info("Caricamento immagine {} al path {} non riuscito: {}", indexPhoto, finalPath, ex.getMessage());
             }
         }
         RenderAtecoNewAEM renderAtecoNewAEM = renderAtecoNew(putAtecoNewRequest, uploadedImagePaths);
         String initialPathJson = getInitialPath(putAtecoNewRequest);
-        String finalPathJson = pathBuilderJson(true, normalizedName, normalizedCity, normalizedRegion, initialPathJson);
+        String finalPathJson = pathBuilderJson(isUpdate, normalizedName, normalizedCity, normalizedRegion, initialPathJson);
         String jsonString = renderJsonToString(renderAtecoNewAEM);
         S3Request s3Request = new S3Request(finalPathJson, jsonString);
         s3Service.process(s3Request);
         logger.info("JSON caricato correttamente al path {}", finalPathJson);
-        //logger.info("[MOCK] Simulazione salvataggio JSON: path={} content={}", finalPathJson, jsonString);
+        // logger.info("[MOCK] Simulazione salvataggio JSON: path={} content={}", finalPathJson, jsonString);
     }
 
-    public void postAtecoNew(PutAtecoNewRequest putAtecoNewRequest){
-        String normalizedName = slugifyService.normalize(putAtecoNewRequest.getName());
-        String normalizedRegion = slugifyService.normalize(putAtecoNewRequest.getRegion());
-        String normalizedCity = slugifyService.normalize(putAtecoNewRequest.getCity());
-
-        List<String> imagesURL = putAtecoNewRequest.getPhotos();
-        List<String> uploadedImagePaths = new ArrayList<>();
-        for(int i = 0; i < imagesURL.size(); i++){
-            String initialPath = getInitialPath(putAtecoNewRequest);
-            String indexPhoto = String.valueOf(i);
-            String finalPath = Utils.pathBuilder(imagesURL.get(i), normalizedName, normalizedRegion, normalizedCity, initialPath, indexPhoto);
-            try{
-                logger.info("Caricamento immagine {} al path {} in corso", indexPhoto, finalPath);
-                //byte[] imageBytes = Utils.downloadImage(imagesURL.get(i));
-                //s3Service.uploadImage(imageBytes, finalPath);
-                uploadedImagePaths.add(finalPath);
-                //logger.info("Immagine {} caricata correttamente al path {}", indexPhoto, finalPath);
-                logger.info("[MOCK] Simulazione upload immagine al path: {}", finalPath);
-            } catch(Exception ex){
-                logger.info("Caricamento immagine {} al path {} non riuscito: {}", indexPhoto, finalPath, ex.getMessage());
-            }
-        }
-        RenderAtecoNewAEM renderAtecoNewAEM = renderAtecoNew(putAtecoNewRequest, uploadedImagePaths);
-        String initialPathJson = getInitialPath(putAtecoNewRequest);
-        String finalPathJson = pathBuilderJson(false, normalizedName, normalizedCity, normalizedRegion, initialPathJson);
-        String jsonString = renderJsonToString(renderAtecoNewAEM);
-        S3Request s3Request = new S3Request(finalPathJson, jsonString);
-        //s3Service.process(s3Request);
-        //logger.info("JSON caricato correttamente al path {}", finalPathJson);
-        logger.info("[MOCK] Simulazione salvataggio JSON: path={} content={}", finalPathJson, jsonString);
-    }
-
-    public RenderAtecoNewAEM renderAtecoNew (PutAtecoNewRequest putAtecoNewRequest, List<String> uploadedImagePaths) {
+    public RenderAtecoNewAEM renderAtecoNew(PutAtecoNewRequest putAtecoNewRequest, List<String> uploadedImagePaths) {
         RenderAtecoNewAEM renderAtecoNewAEM = new RenderAtecoNewAEM();
         renderAtecoNewAEM.setIdentifier(putAtecoNewRequest.getIdentifier());
         renderAtecoNewAEM.setFiscalCod(putAtecoNewRequest.getFiscalCod());
@@ -253,7 +221,7 @@ public class PutAtecoNewService {
 
     public String pathBuilderJson(Boolean isUpdate, String name, String city, String region, String initialPathJson){
         String finalName = name.length() > 80 ? name.substring(0, 80) : name;
-        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
         String action = isUpdate ? "destination_update_" : "destination_put_";
 
         Map<String, String> pathSuffixMap = Map.of(
