@@ -39,13 +39,14 @@ public class UtilsTest {
         String indexPhoto = "main";
 
         // Usa la stessa data generata dal metodo per non avere flakiness
-        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
+        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
         String expected = "/content/dam/tdh-infocamere/it/accommodations/toscana/firenze/myhotel/media/" +
                 currentDate + "_myhotel_main_6789.jpg";
 
         String result = Utils.pathBuilder(imageUrl, name, region, city, initialPath, indexPhoto);
 
-        assertEquals(expected, result);
+        assertEquals(result, "/content/dam/tdh-infocamere/it/accommodations/toscana/firenze/myhotel/media/" +
+                currentDate + "_myhotel_main_6789.jpg");
     }
 
     @Test

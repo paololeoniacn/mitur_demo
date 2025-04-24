@@ -1,12 +1,25 @@
 package com.example.sendMail;
 
 import jakarta.mail.internet.MimeMessage;
+import jakarta.validation.ValidationException;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 @Service
 public class SendMailService {
@@ -72,6 +85,50 @@ public class SendMailService {
         } catch (Exception ex) {
             logger.error("Errore nell'invio della PEC: " + ex.getMessage(), ex);
             throw new RuntimeException("Errore nell'invio della PEC: " + ex.getMessage(), ex);
+        }
+    }
+
+    public void validateWithXsdMail(MailRequest mailRequest){
+        try{
+            // Validazione con XSD
+            JAXBContext jaxbContext = JAXBContext.newInstance(MailRequest.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            StringWriter writer = new StringWriter();
+            marshaller.marshal(mailRequest, writer);
+            String xmlString = writer.toString();
+            // Caricamento schema XSD
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            File mainXsd = new File("src/main/resources/xsd/sendMail.xsd");
+            Schema schema = schemaFactory.newSchema(new Source[] {
+                    new StreamSource(mainXsd)
+            });
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource(new StringReader(xmlString)));
+            logger.info("Validazione riuscita");
+        }catch(Exception e){
+            throw new ValidationException("Errore durante la validazione XML: " + e.getMessage());
+        }
+    }
+
+    public void validateWithXsdPECMail(PECMailRequest pecMailRequest){
+        try{
+            // Validazione con XSD
+            JAXBContext jaxbContext = JAXBContext.newInstance(PECMailRequest.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            StringWriter writer = new StringWriter();
+            marshaller.marshal(pecMailRequest, writer);
+            String xmlString = writer.toString();
+            // Caricamento schema XSD
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            File mainXsd = new File("src/main/resources/xsd/sendMailPEC.xsd");
+            Schema schema = schemaFactory.newSchema(new Source[] {
+                    new StreamSource(mainXsd)
+            });
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource(new StringReader(xmlString)));
+            logger.info("Validazione riuscita");
+        }catch(Exception e){
+            throw new ValidationException("Errore durante la validazione XML: " + e.getMessage());
         }
     }
 

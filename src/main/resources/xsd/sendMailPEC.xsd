@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/sendMailPEC" xmlns:tns="http://www.example.org/sendMailPEC" elementFormDefault="qualified">
+
+    <element name="requestSendMailPEC"
+    	type="tns:requestSendMailPECType">
+    </element>
+    
+    <complexType name="requestSendMailPECType">
+    	<sequence>
+    		<element name="to" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="subject" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="body" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="fullName" type="string" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <element name="responseSendMailPEC"
+    	type="tns:responseSendMailPECType">
+    </element>
+    
+    <complexType name="responseSendMailPECType">
+    	<sequence>
+    		<element name="status" type="string"></element>
+    		<element name="code" type="string"></element>
+    		<element name="message" type="string"></element>
+    	</sequence>
+    </complexType>
+</schema>

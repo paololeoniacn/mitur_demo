@@ -3,60 +3,54 @@ package com.example.putAtecoNew;
 import com.example.putAccommodation.ConsentsType;
 import com.example.putAccommodation.ContactType;
 import com.example.putAccommodation.LegalEntityType;
-import jakarta.xml.bind.annotation.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
-
 import java.util.List;
 
 @Data
-@XmlRootElement(name = "requestPutAtecoNew", namespace = "http://www.example.org/putAtecoNew")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class PutAtecoNewRequest {
 
+    @NotBlank
     private String identifier;
+    @NotBlank
     private String name;
     private String vatCod;
+    @NotBlank
     private String fiscalCod;
     private String businessName;
     private String mainActivity;
     private String provinceCCIAA;
     private String reaCCIAACod;
     private String legalForm;
-
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private ConsentsType consents;
-
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private ContactType companyContact;
-
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private ContactType editorContact;
-
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private LegalEntityType legalEntity;
-
+    @NotBlank
     private String fullAddress;
+    @NotBlank
     private String city;
     private String postalCode;
+    @NotBlank
     private String region;
     private String province;
     private String country;
     private String streetName;
     private String streetNumber;
     private String alternativeAddress;
+    @NotBlank
     private String primaryAtecoCod;
+    @NotBlank
     private String phoneNumber;
     private String webSite;
     private String mailAddress;
     private String googleWebAddress;
     private String isoCertification;
+    @NotBlank
     private String description;
-
-    @XmlElementWrapper(name = "photos")
-    @XmlElement(name = "photo")
+    @NotEmpty
     private List<String> photos;
-
-    @XmlElement(namespace = "http://www.example.org/putRequest")
     private OpeningHoursType openingHoursType;
 
 }

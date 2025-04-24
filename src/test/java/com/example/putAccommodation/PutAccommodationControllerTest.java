@@ -37,7 +37,7 @@ public class PutAccommodationControllerTest {
             request.setPhotos(List.of("http://image1.jpg", "http://image2.jpg"));
             request.setFullAddress("Via Roma 10, Roma");
             request.setPhoneNumber("+390612345678");
-            request.setAccomodationType("Hotel");
+            request.setAccomodationType(AccomodationType.HOTEL);
             request.setDescription("Descrizione");
             return request;
         }
@@ -45,21 +45,19 @@ public class PutAccommodationControllerTest {
         @Test
         void testPutAccommodation_Success() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
-            doNothing().when(putAccommodationService).putAccommodation(request);
+            doNothing().when(putAccommodationService).putAccommodation(request, true);
 
             ResponseEntity<String> response = putAccommodationController.putAccommodation(request);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals("Aggiornamento avvenuto con successo", response.getBody());
-            verify(putAccommodationService).putAccommodation(request);
+            verify(putAccommodationService).putAccommodation(request, true);
         }
 
         @Test
         void testPutAccommodation_Failure() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
-            doThrow(new RuntimeException("Internal error")).when(putAccommodationService).putAccommodation(request);
+            doThrow(new RuntimeException("Internal error")).when(putAccommodationService).putAccommodation(request, true);
 
             ResponseEntity<String> response = putAccommodationController.putAccommodation(request);
 
@@ -70,21 +68,19 @@ public class PutAccommodationControllerTest {
         @Test
         void testPostAccommodation_Success() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
-            doNothing().when(putAccommodationService).postAccommodation(request);
+            doNothing().when(putAccommodationService).putAccommodation(request, false);
 
             ResponseEntity<String> response = putAccommodationController.postAccommodation(request);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals("Inserimento avvenuto con successo", response.getBody());
-            verify(putAccommodationService).postAccommodation(request);
+            verify(putAccommodationService).putAccommodation(request, false);
         }
 
         @Test
         void testPostAccommodation_Failure() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
-            doThrow(new RuntimeException("Internal error")).when(putAccommodationService).postAccommodation(request);
+            doThrow(new RuntimeException("Internal error")).when(putAccommodationService).putAccommodation(request, false);
 
             ResponseEntity<String> response = putAccommodationController.postAccommodation(request);
 
@@ -95,8 +91,7 @@ public class PutAccommodationControllerTest {
         @Test
         void testPutAccommodation_Timeout() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
-            doThrow(new ResourceAccessException("Timeout")).when(putAccommodationService).putAccommodation(request);
+            doThrow(new ResourceAccessException("Timeout")).when(putAccommodationService).putAccommodation(request, true);
 
             ResponseEntity<String> response = putAccommodationController.putAccommodation(request);
 
@@ -107,8 +102,7 @@ public class PutAccommodationControllerTest {
         @Test
         void testPostAccommodation_Timeout() {
             PutAccommodationRequest request = getMockRequest();
-            doNothing().when(putAccommodationService).validateWithXsd(request);
-            doThrow(new ResourceAccessException("Timeout")).when(putAccommodationService).postAccommodation(request);
+            doThrow(new ResourceAccessException("Timeout")).when(putAccommodationService).putAccommodation(request, false);
 
             ResponseEntity<String> response = putAccommodationController.postAccommodation(request);
 

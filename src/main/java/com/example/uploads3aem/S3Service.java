@@ -5,12 +5,10 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 
 @Service
 public class S3Service {
@@ -46,16 +44,11 @@ public class S3Service {
         s3Client.putObject(putRequest, RequestBody.fromString(content));
     }
 
-    // caricamento immagine su S3 -> TODO: aggiungere apiKey
-    public void uploadImageFromUrl(String imageUrl, String finalPath) throws IOException {
-        InputStream inputStream = new URL(imageUrl).openStream();// scarica immagine da URL remoto
-        byte[] imageBytes = inputStream.readAllBytes();
+    public void uploadImage(byte[] imageBytes, String finalPath) throws IOException {
         PutObjectRequest putRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(finalPath)
-                .contentType("image/jpeg") // o image/png se serve
                 .build();
-
         s3Client.putObject(putRequest, RequestBody.fromBytes(imageBytes));
     }
 }
