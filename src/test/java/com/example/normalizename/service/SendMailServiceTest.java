@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.normalizename.service;
 
 import com.example.sendMail.MailRequest;
 import com.example.sendMail.PECMailRequest;

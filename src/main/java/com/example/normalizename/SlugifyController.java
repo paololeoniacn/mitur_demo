@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.normalizename;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

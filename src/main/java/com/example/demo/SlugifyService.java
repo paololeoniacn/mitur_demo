@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import com.example.normalizename.Slugifier;
 import org.springframework.stereotype.Service;
 
 @Service

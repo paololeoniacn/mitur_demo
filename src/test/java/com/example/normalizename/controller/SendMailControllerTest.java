@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.normalizename.controller;
 
 import com.example.sendMail.MailRequest;
 import com.example.sendMail.PECMailRequest;
